@@ -185,12 +185,14 @@ document.getElementById('saveIPBtn').addEventListener('click', () => {
   localStorage.setItem('kmresIP', document.getElementById('kmresIP').value);
   alert('IP kaydedildi.');
 });
-document.getElementById('toggleBtn').addEventListener('click', showAMR);
+document.getElementById('toggleBtn').addEventListener('click', subMission);
 document.getElementById('forceBtn').addEventListener('click', () => {
-  // burada erz zorlamayı tetikleyebilirsiniz
   alert('Force komutu yollandı.');
 });
 
 // Formlardaki “Alt Görev Başlat” ve “Başlat” butonları
 document.querySelector('[onclick="subMission()"]').addEventListener('click', subMission);
 document.querySelector('[onclick="startWorkflow()"]').addEventListener('click', startWorkflow);
+
+window.subMission = subMission;
+

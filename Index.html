@@ -10,27 +10,26 @@
         crossorigin="anonymous">
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Custom CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Ensure navbar has enough height */
     .navbar { min-height: 70px; }
     .spacing { margin-top: 60px; }
     .leftspace { margin-left: 50px; }
   </style>
 </head>
 <body>
-  <!-- Login Modal (static backdrop prevents clicking outside) -->
-<div class="modal fade" id="loginModal"
-     data-bs-backdrop="static" data-bs-keyboard="false"
-     tabindex="-1" aria-labelledby="loginModalLabel"
-     aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="loginModalLabel">Giriş Yapın</h5>
-      </div>
-      <div class="modal-body">
+  <!-- Login Panel -->
+  <div class="modal fade" id="loginModal"
+       data-bs-backdrop="static" data-bs-keyboard="false"
+       tabindex="-1" aria-labelledby="loginModalLabel"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginModalLabel">Giriş Yapın</h5>
+        </div>
+        <div class="modal-body">
           <div class="input-group mb-3">
             <span class="input-group-text"><i class="bi bi-lock"></i></span>
             <input
@@ -46,28 +45,27 @@
               <i class="bi bi-eye"></i>
             </button>
           </div>
-
-        <div id="loginError"
-             class="text-danger"
-             style="display:none">
-          Geçersiz şifre.
+          <div id="loginError"
+               class="text-danger"
+               style="display:none">
+            Geçersiz şifre.
+          </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button"
-                id="loginBtn"
-                class="btn btn-primary">
-          Giriş
-        </button>
+        <div class="modal-footer">
+          <button type="button"
+                  id="loginBtn"
+                  class="btn btn-primary">
+            Giriş
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-  <!-- Navbar with bootstrap tabs in navbar-nav -->
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
     <div class="container">
-      <!-- Brand -->
+      <!-- Logo -->
       <a class="navbar-brand" href="#">
         <img src="logo.png" alt="KUKA" height="30">
       </a>
@@ -77,7 +75,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav nav nav-tabs me-auto leftspace" id="amrTab" role="tablist">
-            <li class="nav-item" role="presentation">
+          <li class="nav-item" role="presentation">
             <a class="nav-link active" id="workflows-tab" data-bs-toggle="tab"
                href="#workflows" role="tab" aria-controls="workflows" aria-selected="false">
               Hazır Butonlar
@@ -90,18 +88,17 @@
             </a>
           </li>
         </ul>
-        <!-- Clock -->
+        <!-- Saat -->
         <span id="date-div" class="ms-auto pe-3"></span>
       </div>
     </div>
   </nav>
 
-  <!-- Tab Panes -->
+  <!-- Tab Panelleri -->
   <div class="tab-content mt-4 container" id="amrTabContent">
     <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab">
       <form id="submissionsForm" class="p-4 border rounded bg-white">
         <h2 class="mb-4">Alt Görevler Formu</h2>
-
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label for="robotIdSub" class="form-label">ID AMR</label>
@@ -118,7 +115,6 @@
             </select>
           </div>
         </div>
-
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label for="mapCodeSub" class="form-label">mapCode</label>
@@ -129,7 +125,6 @@
             <input type="text" id="floorNumberSub" class="form-control">
           </div>
         </div>
-
         <div class="row g-3 mb-4">
           <div class="col-md-6">
             <label for="position1Sub" class="form-label">Nodo Destino 1</label>
@@ -140,12 +135,9 @@
             <input type="text" id="position2Sub" class="form-control" readonly>
           </div>
         </div>
-
         <button type="button" class="btn btn-success me-2" onclick="subMission()">Alt Görev Başlat</button>
         <button type="button" class="btn btn-secondary" onclick="regresarMenuRobot()">Geri</button>
-
         <hr class="my-4">
-
         <h5>Response</h5>
         <table class="table table-sm mt-2" id="outputTableMission">
           <tbody>
@@ -154,80 +146,25 @@
         </table>
       </form>
     </div>
-
     <div class="tab-pane fade show active" id="workflows" role="tabpanel" aria-labelledby="workflows-tab">
       <form class="p-4 border rounded bg-white">
         <h2 class="mb-4">Özelleştiriliş Butonlar Formu</h2>
-         <div class="row g-3 mb-4 spacing">
+        <div class="row g-3 mb-4 spacing">
           <div class="col-md-6">
-                <button type="button" class="btn btn-success me-2" onclick="subMission()">Destinasyona ilerlet</button>
+            <button type="button" class="btn btn-success me-2" onclick="subMission()">Destinasyona ilerlet</button>
           </div>
           <div class="col-md-6">
-                <button type="button" class="btn btn-success me-2" onclick="subMission()">Onay Gönder</button>
+            <button type="button" class="btn btn-success me-2" onclick="subMission()">Onay Gönder</button>
           </div>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Bootstrap Bundle JS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
           integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
-          crossorigin="anonymous"></script>
-
-  <!-- Clock Script -->
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const dateDiv = document.getElementById('date-div');
-      function updateClock() {
-        const now = new Date();
-        dateDiv.textContent = now.toLocaleString('tr-TR', {
-          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-          hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
-      }
-      updateClock(); setInterval(updateClock, 1000);
-    });
-  </script>
-  <!-- Şifre Paneli -->
-  <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    // Sayfa açıldığında modalı göster
-    const loginModal = new bootstrap.Modal(
-      document.getElementById('loginModal')
-    );
-    loginModal.show();
-
-    // Lokal sabit şifre
-    const CORRECT_PASSWORD = 'admin';
-
-    // Şifre giriş butonuna tıklama olayını dinle
-    document.getElementById('loginBtn')
-      .addEventListener('click', () => {
-        const pw = document.getElementById('inputPassword').value;
-        const errorEl = document.getElementById('loginError');
-
-        if (pw === CORRECT_PASSWORD) {
-          // password doğruysa, paneli gizle
-          loginModal.hide();
-        } else {
-          // hatalı şifre girildiyse, hata mesajını göster
-          errorEl.style.display = 'block';
-        }
-      });
-  });
-
-  // şifre görünürlüğünü değiştirme
-  const passwordInput = document.getElementById('inputPassword');
-  const toggleBtn     = document.getElementById('togglePassword');
-  toggleBtn.addEventListener('click', () => {
-    const isPwd = passwordInput.type === 'password';
-    passwordInput.type = isPwd ? 'text' : 'password';
-    const icon = toggleBtn.querySelector('i');
-    icon.classList.toggle('bi-eye');
-    icon.classList.toggle('bi-eye-slash');
-  });
-
-</script>
+          crossorigin="anonymous"> </script>
+  <script src="main.js"></script>
 </body>
 </html>

@@ -1,3 +1,0 @@
-npx npx json-server db.json
-json-server --watch db.json
-json-server -w -p 3000 db.json

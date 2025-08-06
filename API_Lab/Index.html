@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<meta charset="utf-8" />
+	<title>API Lab</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+	<span>
+		<label for="kmresIP">AMRFleet IP:</label>
+		<input type="text" id="kmresIP" value="192.168.56.110">
+		&nbsp
+		&nbsp
+		&nbsp
+		&nbsp
+		<a href="http://localhost:10870/interfaces/doc.html?lang=en">Link HELP AMRFleet Interface</a>
+	</span>
+	<br>
+	<h2><label id="debug"> </label></h2>
+	<div class="tabs">
+		<div class="tab-container">
+			<div id="tab4" class="tab">
+				<a href="#tab4">SubMissions</a>
+				<div class="tab-content">
+					<h1>SubMissions Form</h1>
+		</div>
+	</div>
+
+
+			<div id="tab3" class="tab">
+				<a href="#tab3">WorkFlows</a>
+				<div class="tab-content">
+					<h1>WorkFlow Form</h1>
+					<span id="spanMission" style="display: inline-block;">
+						<h2>START templateCode</h2>
+						<label for="mapCode6">mapCode:</label>
+						<input type="text" id="mapCode6" value="">
+						<!-- <br> -->
+						<label for="floorNumber6">floorNumber:</label>
+						<input type="text" id="floorNumber6" value="">
+						<!-- <br> -->
+						<label for="workflow6">templateCode:</label>
+						<input type="text" id="workflow6" value="W000000001">
+						<!-- <button id="StartWorkFlow">StartWorkFlow</button> -->
+						<br> 
+						<button id="StartWorkFlow" onclick="StartWorkFlow()">Start</button>
+						<!-- <button id="regresarMenuRobot" onclick="regresarMenuRobot()">Regresar</button> -->
+					</span>
+
+					<h2><label
+							id="labelResponseMission">_____________________________________Response___________________________________________________</label>
+					</h2>
+					<span>
+						<table id="outputTableMission">
+							<tbody>
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<h2>_________________________________________________________________________________________________
+					</h2>
+
+				</div>
+			</div>
+			<div id="tab2" class="tab">
+				<a href="#tab2">AMRs</a>
+				<div class="tab-content">
+					<h1>Robot Form</h1>
+
+					<h2><label
+							id="labelCommands2">_____________________________________Commands___________________________________________________</label>
+					</h2>
+					<span id="spanRobotQuery" style="display: inline-block;">
+						<h2>Robot information</h1>
+							<label for="robotId4">ID del Robot:</label>
+							<input type="text" id="robotId4" value="">
+							<!-- <br> -->
+							<label for="robotType4">robotType:</label>
+							<input type="text" id="robotType4" value="">
+							<!-- <br> -->
+							<label for="floorNumber4">floorNumber:</label>
+							<input type="text" id="floorNumber4" value="">
+							<!-- <br> -->
+							<label for="mapCode4">mapCode:</label>
+							<input type="text" id="mapCode4" value="">
+							<!-- <br> -->
+							<!-- <br> -->
+							<!-- <br> -->
+							<!-- <br> -->
+							<br>
+							<!-- <button id="infoAMR">Info AMR</button> -->
+							<button id="showAMR" onclick="showAMR()">robotQuery</button>
+							<button id="reset" onclick="resetAMR()">Reset</button>
+					</span>
+
+					<span id="spanSubMission" style="display: none;">
+						<h2>SubMission AMR</h2>
+						<label for="robotId5">ID AMR:</label>
+						<input type="text" id="robotId5" value="">
+						<select name="robotType5" id="robotType5">
+							<option value="LIFT">LIFT</option>
+							<option value="ROLLER">ROLLER</option>
+							<option value="PICKER">PICKER</option>
+							<option value="FORKLIFT">FORKLIFT</option>
+							<option value="HCSBOX">HCSBOX</option>
+						</select>
+						<br>
+						<label for="mapCode5">mapCode:</label>
+						<input type="text" id="mapCode5" value="">
+						<!-- <br> -->
+						<label for="floorNumber5">floorNumber:</label>
+						<input type="text" id="floorNumber5" value="">
+						<br>
+						<select name="missionType5" id="missionType5">
+							<option value="MOVE">MOVE</option>
+							<option value="FORKLIFT_MOVE">FORKLIFT_MOVE</option>
+							<option value="PICKER_MOVE">PICKER_MOVE</option>
+							<option value="ROLLER_MOVE">ROLLER_MOVE</option>
+							<option value="RACK_MOVE">RACK_MOVE</option>
+						</select>
+						<br>
+						<label for="containerCode5">containerCode:</label>
+						<!-- <input type="text" id="containerCode5" value=""> -->
+						<select name="containerCode5" id="containerCode5" class="readonly" disabled="true">
+							<option value=" "> </option>
+						</select>
+						<label for="position5">Nodo Destino1:</label>
+						<input type="text" id="position5" value="">
+						<br>
+						<label for="position25">Nodo Destino2:</label>
+						<input type="text" id="position25" value="" class="readonly" readonly="true">
+						<br>
+						<!-- <button id="SubMission">SubMission</button> -->
+						<button id="subMission" onclick="subMission()">SubMission</button>
+						<button id="regresarMenuRobot" onclick="regresarMenuRobot()">Regresar</button>
+					</span>
+					<br>
+					<br>
+					<h2><label
+							id="labelResponseAMR">_____________________________________Response___________________________________________________</label>
+					</h2>
+					<span>
+						<table id="outputTableAMR">
+							<tbody>
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<h2>_________________________________________________________________________________________________
+					</h2>
+					<br>
+					<br>
+
+				</div>
+			</div>
+			<div id="tab1" class="tab">
+				<a href="#tab1">Containers</a>
+				<div class="tab-content">
+					<h1>Container Form</h1>
+					<!-- <h2><label id="labelContainer">_____________________________________spanQuery___________________________________________________</label></h2> -->
+					<span id="spanQuery" style="display: inline-block;">
+						<!-- <label for="containerCode">containerCode:</label>
+					<input type="text" id="containerCode0" value="">
+					&nbsp
+					&nbsp
+					<label for="nodeCode">nodeCode:</label>
+					&nbsp
+					&nbsp
+					<input type="text" id="nodeCode0" value="">
+					&nbsp
+					&nbsp
+					<label for="containerModelCode0">containerModelCode:</label>
+					<input type="text" id="containerModelCode0" value="">
+					&nbsp
+					&nbsp
+					<label for="areaCode0">areaCode:</label>
+					<input type="text" id="areaCode0" value="">
+					&nbsp
+					&nbsp
+					<label for="emptyFullStatus0">emptyFullStatus:</label>
+					<input type="text" id="emptyFullStatus0" value="">
+					&nbsp
+					&nbsp -->
+						<br>
+
+						<table id="tablaFilterShowContainer" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>containerCode</th>
+									<th>nodeCode</th>
+									<th>containerModelCode</th>
+									<th>areaCode0</th>
+									<th>emptyFullStatus0</th>
+								</tr>
+								<tr>
+									<td><input type="text" id="containerCode0" value=""></td>
+									<td><input type="text" id="nodeCode0" value=""></td>
+									<!-- <td><input type="text" id="containerModelCode0" value=""></td> -->
+									<td>
+										<select name="containerModelCode0" id="containerModelCode0"  style="text-align:center;">
+											<option value=""></option>
+										</select>
+									</td>
+									<!-- <td><input type="text" id="areaCode0" value=""></td> -->
+									<td>
+										<select name="areaCode0" id="areaCode0">
+											<option value=""></option>
+										</select>
+									</td>
+									<td>
+										<!-- <input type="text" id="emptyFullStatus0" value=""> -->
+										<select name="emptyFullStatus0" id="emptyFullStatus0">
+											<option value="2"></option>
+											<option value="1">FULL</option>
+											<option value="0">EMPTY</option>
+										</select>
+									</td>
+
+								</tr>
+							</tbody>
+						</table>
+						<button id="infoContainer" onclick="showContainer()">containerQuery</button>
+						<button id="reset" onclick="reset()">Reset</button>
+						<!-- <button id="infoContainer">containerQuery</button> -->
+					</span>
+
+					<span id="spanInsertCreate" style="display: none;">
+						<!-- _____________________________________spanInsertCreate___________________________________________________-->
+						<label for="containerCode">containerCode:</label>
+						<input type="text" id="containerCode2" value="">
+						<br>
+						<label for="position3">position:</label>
+						<input type="text" id="position2" value="Lab1-D1-">
+						<br>
+						<label for="containerModelCode2">containerModelCode:</label>
+						<!-- <input type="text" id="containerModelCode2" value="Palet"> -->
+						<select name="containerModelCode2" id="containerModelCode2">
+							<option value=""></option>
+						</select>
+						<br>
+						<label for="containerType3">containerType:</label>
+						<!-- <input type="text" id="containerType2" value="Tray(AMR)"> -->
+						<select name="containerType2" id="containerType2">
+							<option value="Tray(AMR)">Tray(AMR)</option>
+							<option value="Rack">Rack</option>
+							<option value="Tray(Forklift)">Tray(Forklift)</option>
+							<option value="Mobile Box-Shelf">Tray(Forklift)</option>
+						</select>
+
+						<br>
+						<label for="enterOrientation3">enterOrientation:</label>
+						<input type="text" id="enterOrientation2" value="90">
+						<br>
+						<!-- <label for="isNew3">isNew:</label> -->
+						<br>
+						<!-- <button id="insertContainer">Insert/Create</button> -->
+						<button id="insertContainer" onclick="insertContainer()">Submit</button>
+						<select name="isNew2" id="isNew2">
+							<option value="true">Create</option>
+							<option value="false">Insert</option>
+						</select>
+						&nbsp
+						&nbsp
+						&nbsp
+						<button id="regresar" onclick="regresar()">Regresar</button>
+					</span>
+
+
+					<span id="spanUpdate" style="display: none;">
+						<label for="containerType3">containerType:</label>
+						<input type="text" id="containerType3" value="Tray(AMR)" class="readonly" readonly>
+						<br>
+						<label for="containerCode3">containerCode:</label>
+						<input type="text" id="containerCode3" value="" class="readonly" readonly>
+						<br>
+						<label for="originPosition3">originPosition:</label>
+						<input type="text" id="originPosition3" value="" class="readonly" readonly>
+						<br>
+						<label for="targetPosition3">targetPosition:</label>
+						<input type="text" id="targetPosition3" value="">
+						<br>
+						<label for="emptyStatus3">emptyStatus:</label>
+						<input type="text" id="emptyStatus3" value="">
+						<br>
+						<label for="reason3">reason:</label>
+						<input type="text" id="reason3" value="">
+						<br>
+						<!-- <button id="updateContainer">Update</button> -->
+						<button id="updateContainer" onclick="updateContainer()">Update</button>
+						&nbsp
+						&nbsp
+						&nbsp
+						<button id="regresar" onclick="regresar()">Regresar</button>
+					</span>
+
+					<span id="spanRemoveDelete" style="display: none;">
+						<!-- <button type=button onclick="alert('This 15-20 minute piece was composed by George Gershwin.')">Show hint</button> -->
+						<label for="containerCode">containerCode:</label>
+						<input type="text" id="containerCode1" value="">
+						<br>
+						<label for="containerType">containerType:</label>
+						<input type="text" id="containerType1" value="Tray(AMR)">
+						<br>
+						<label for="position1">position:</label>
+						<input type="text" id="position1" value="Lab1-D1-">
+						<br>
+						<br>
+						<br>
+						<br>
+						<br>
+						<!-- <button id="removeContainer">Submit</button> -->
+						<button id="removeContainer" onclick="removeContainer()">Submit</button>
+						<select name="isDelete1" id="isDelete1">
+							<option value="true">Remove</option>
+							<option value="false">Delete</option>
+						</select>
+						&nbsp
+						&nbsp
+						&nbsp
+						<button id="regresar" onclick="regresar()">Regresar</button>
+					</span>
+
+
+
+					<br>
+					<br>
+					<h2><label
+							id="labelResponseContainer">_____________________________________Response___________________________________________________</label>
+					</h2>
+					<span>
+						<table id="outputTableContainer">
+							<tbody>
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<h2>_________________________________________________________________________________________________
+					</h2>
+
+
+					<!-- <span id="spanGetContainerModels" style="display: block;">
+					<button id="getContainerModelsButton" onclick="getContainerModels()">Get Model Palets</button>
+					<span>
+						<table id="outputTableModels">
+							<tbody>
+							</tbody>
+						</table>	
+						</span>
+				</span> -->
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="containerQuery.js"></script>
+	<script src="robotQuery.js"></script>
+	<script src="mainAPI.js"></script>
+</body>
+
+</html>

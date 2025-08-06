@@ -44,34 +44,42 @@ function renderMissionResponse(resp) {
 
 // Alt görev gönderir
 async function subMission() {
-  const kmresIP    = getBaseUrl();
-  const robotId    = document.getElementById('robotIdSub').value;
-  const missionType= document.getElementById('missionTypeSub').value;
-  const mapCode    = document.getElementById('mapCodeSub').value;
-  const floorNo    = document.getElementById('floorNumberSub').value;
-  const pos1       = document.getElementById('position1Sub').value;
-  const pos2       = document.getElementById('position2Sub').value;
-  
-  const url = kmresIP + 'submitMission';
+  const base = getBaseUrl();
+
+  // Yeni id’leri oku
+  const robotId   = document.getElementById('robotIdCtrl').value;
+  const mapCode   = document.getElementById('layoutCtrl').value;
+  const floorNo   = document.getElementById('districtCtrl').value;
+  const missionCodeInput = document.getElementById('codeCtrl').value;
+  const interval  = parseInt(document.getElementById('intervalCtrl').value, 10) || 5;
+
+  const url = base + 'submitMission';
   const payload = {
-    orgId:    `${mapCode}-${floorNo}-`,
-    requestId: `req-${Date.now()}`,
-    missionCode:`msn-${Date.now()}`,
-    missionType,
-    robotIds:[robotId],
+    orgId:        `${mapCode}-${floorNo}-`,
+    requestId:    `req-${Date.now()}`,
+    missionCode:  missionCodeInput || `msn-${Date.now()}`,
+    missionType:  'MOVE',   // eğer missionType girişi yoksa sabit MOVE
+    robotIds:     [robotId],
     missionData: [
-      { sequence:1, position:pos1, type:"NODE_POINT", passStrategy:"AUTO", waitingMillis:2 },
-      { sequence:2, position:pos2, type:"NODE_POINT", putDown:true, passStrategy:"AUTO", waitingMillis:2 }
+      {
+        sequence:       1,
+        position:       missionCodeInput,     // ya da başka bir alan
+        type:           "NODE_POINT",
+        passStrategy:   "AUTO",
+        waitingMillis:  interval * 1000
+      }
     ]
   };
 
+  console.log('subMission payload:', payload);
   try {
-    const resp = await appFetch(url, payload, 'POST');
+    const resp = await appFetch(url, payload);
     renderMissionResponse(resp);
   } catch (e) {
     alert('Görev gönderilirken hata: ' + e);
   }
 }
+
 
 
 // --- 3) Özel Workflow Başlat ------------------------------------

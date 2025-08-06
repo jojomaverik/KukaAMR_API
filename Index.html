@@ -94,6 +94,33 @@
     </div>
   </nav>
 
+  <div class="container mt-3 mb-4">
+  <div class="row">
+    <!-- On xs: full width; on md+ take 4/12 -->
+    <div class="col-12 col-md-4">
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-hdd-rack"></i></span>
+        <input type="text"
+               class="form-control"
+               id="fleetIP"
+               placeholder="KUKA AMR Fleet IP"
+               aria-label="Fleet IP">
+        <button class="btn btn-primary"
+                type="button"
+                id="saveIPBtn">
+          Kaydet
+        </button>
+      </div>
+    </div>
+    <!-- Ekstra -->
+    <div class="col-12 col-md-8">
+      <!-- başka şey konmak istenirse buraya -->
+    </div>
+  </div>
+</div>
+
+
+
   <!-- Tab Panelleri -->
   <div class="tab-content mt-4 container" id="amrTabContent">
     <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab">

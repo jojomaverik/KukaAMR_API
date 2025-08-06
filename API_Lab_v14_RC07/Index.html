@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<meta charset="utf-8" />
+	<title>API Lab V14 RC07</title>
+	<link rel="stylesheet" href="styles/styles.css">
+</head>
+
+<body>
+	<span style="display: inline-block;">
+		<div id="header">
+		<h1>KUKA Iberia</h1>
+			<h1 id="display-time">
+				<script>
+					function myFunc() {
+						var now = new Date();
+						var time = now.getHours() + ":" + now.getMinutes().toString().padStart(2, "0") + ":" + now.getSeconds().toString().padStart(2, "0");
+						document.getElementById('display-time').innerHTML = time;
+					}
+					setInterval(myFunc, 1000);
+				</script>
+			</h1>
+			&nbsp
+			&nbsp
+			&nbsp
+			&nbsp
+			<label for="kmresIP">AMRFleet IP:</label>
+			<input type="text" id="kmresIP" value="192.168.56.110" onchange=kmresIPOnChange()>
+			&nbsp
+			&nbsp
+			&nbsp
+			&nbsp
+			<button id="openHELP">Interface document</button>
+			<!-- <a href="http://localhost:10870/interfaces/doc.html?lang=en">Link HELP AMRFleet Interface</a> -->
+			<button id="openAMRFleet">AMRFleet</button>
+			<!-- <label for="json-server">Recuerda: json-server --watch ./json/db.json</label> -->
+
+			<!-- <button id="saveDataForm" onclick="saveDataForm()">Save DataForm</button>
+			<button id="resetDataForm" onclick="resetStorageData()">Reset DataForm</button>
+			<button id="logDataForm" onclick="logStorageData()">log DataForm</button> -->
+			<script>
+				document.getElementById("openHELP").addEventListener("click", function () {
+					var kmresIP = document.getElementById("kmresIP").value;
+					url = "http://" + kmresIP + ":10870/interfaces/doc.html?lang=en"
+					window.open(url);
+				});
+			</script>
+			<script>
+				document.getElementById("openAMRFleet").addEventListener("click", function () {
+					var kmresIP = document.getElementById("kmresIP").value;
+					url = "http://" + kmresIP + ":5000"
+					window.open(url);
+				});
+			</script>
+			<br>
+		</div>
+	</span>
+
+	<br>
+	<div class="tabs">
+		<div class="tab-container">
+			<div id="tab5" class="tab">
+				<a href="#tab5">SubMissions</a>
+				<div class="tab-content">
+					<div id="header">
+						<h1 id="MainTimerWorkFlow1">WorkFlow </h1>
+						<h1 id="MainTimerWorkFlow">Timer: 0:00:00</h1>
+
+						<button id="startStopMainTimerWorkFlows" onclick="startStopMainTimerWorkFlows()">Start/Stop
+							Timer</button>
+					</div>
+					<br>
+					<label id="workFlows">Number of WorkFlows:</label>
+					<input type="number" id="nWorkFlows" value="3" onchange=nWorkFlowsOnChange() min="1"
+						style="width: 50px;">
+					<button id="startStopAllWorkFlows">Start/Stop WorkFlows</button>
+					<button id="resetAllWorkFlows">Reset WorkFlows</button>
+					<br>
+					<span>
+						<table id="workFlowTable" style="background-color: #02376d;" onchange=cambioTablaWorkFlows()>
+							<tbody id="tbodyWorkFlows">
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<br>
+					<br>
+					<br>
+					<div id="header">
+						<h1 id="MainTimerMission1">Missions </h1>
+						<h1 id="MainTimerMission">Timer: 0:00:00</h1>
+						<button id="startStopTimer" onclick="startStopMainTimerMission()">Start/Stop Timer</button>
+					</div>
+					<br>
+					<label id="misiones">Number of Missions:</label>
+					<input type="number" id="nMissions" value="3" onchange=nMissionsOnChange() min="1"
+						style="width: 50px;">
+					<button id="startStopAllMissions">Start/Stop Missions</button>
+					<button id="resetAllmissions">Reset Missions</button>
+					<br>
+					<span>
+						<table id="missionTable" style="background-color: #02376d;" onchange=cambioTablaMisiones()>
+							<!-- <table id="missionTable" style="background-color: #02376d;"> -->
+							<tbody id="tbodyWorkMissions">
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<br>
+
+					<span id="spanLog">
+						<label id="consoleLogMissiom">LOG</label>
+						&nbsp
+						&nbsp
+						&nbsp
+						&nbsp
+						<label>Max inputs</label>
+						<!-- <br> -->
+						<input type="number" id="nMaxLogInputs" value="20" onchange=nMissionsOnChange() min="1" style="width: 50px;">
+						&nbsp
+						&nbsp
+						&nbsp
+						&nbsp
+						<button id="deleteLogs" onclick="deleteLogs()">Reset Log</button>
+						&nbsp
+						&nbsp
+						&nbsp
+						&nbsp
+						<input type="checkbox" id="checkOnlyFinalStatus" value="">OnlyFinalStatus</inpunt>
+						<!-- <br> -->
+						<ul id="ul_log">
+							<!-- Acá van los ítems -->
+						</ul>
+					</span>
+				</div>
+			</div>
+
+
+			<div id="tab4" class="tab" hidden="false" -->
+				<a href="#tab4">WorkFlows</a>
+				<div class="tab-content">
+					<h1>WorkFlow Form</h1>
+					<br>
+					<span id="spanMission" style="display: inline-block;" style="background-color: #012345;">
+						<h2>START templateCode</h2>
+						<label for="mapCodeAMR6">mapCode:</label>
+						<input type="text" id="mapCodeAMR6" value="">
+						<!-- <br> -->
+						<label for="floorNumberAMR6">floorNumber:</label>
+						<input type="text" id="floorNumberAMR6" value="">
+						<!-- <br> -->
+						<label for="workflow6">templateCode:</label>
+						<input type="text" id="workflow6" value="W000000001">
+						<!-- <button id="StartWorkFlow">StartWorkFlow</button> -->
+						<br>
+						<button id="StartWorkFlow" onclick="StartWorkFlow()">Start</button>
+						<!-- <button id="regresarMenuRobot" onclick="regresarMenuRobot()">Regresar</button> -->
+					</span>
+
+					<h2><label
+							id="labelResponseMission">_____________________________________Response___________________________________________________</label>
+					</h2>
+					<span>
+						<table id="outputTableMission" style="background-color: #012345;">
+							<tbody>
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<h2>_________________________________________________________________________________________________
+					</h2>
+
+				</div>
+			</div>
+
+			<div id="tab3" class="tab">
+				<a href="#tab3">Jobs</a>
+				<div class="tab-content">
+					<h1>Jobs Form</h1>
+					<br>
+					<span id="spanJobs" style="display: inline-block;" style="background-color: #012345;">
+						<br>
+						<br>
+						<br>
+						<table id="tablaFilterShowJobs" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>workflowName</th>
+									<th>workflowCode</th>
+									<th>workflowId</th>
+									<th>jobCode</th>
+									<th>robotId</th>
+									<th>containerCode</th>
+									<th>limitJobs1</th>
+								</tr>
+								<tr>
+									<td><input type="text" id="workflowNameJobs1" value=""></td>
+									<td><input type="text" id="workflowCodeJobs1" value=""></td>
+									<td><input type="text" id="workflowIdJobs1" value=""></td>
+									<td><input type="text" id="jobCodeJobs1" value=""></td>
+									<td><input type="text" id="robotIdJobs1" value=""></td>
+									<td><input type="text" id="containerCodeJobs1" value=""></td>
+									<td><input type="text" id="limitJobs1" value="10"></td>
+								</tr>
+							</tbody>
+						</table>
+						<br>
+						<button id="jobQuery" onclick="showJobs()">Query</button>
+						<input type="checkbox" id="checkOnlineJobs" value="" onchange="onlineJobs()">Online</inpunt>
+						<label for="intervalJobs1">interval(s):</label>
+						<input type="text" id="intervalJobs1" style="width: 50px;" value="5">
+
+					</span>
+
+					<h2><label
+							id="labelResponsejobQuery">_____________________________________Response___________________________________________________</label>
+					</h2>
+					<span>
+						<table id="outputTableJobsQuery" style="background-color: #012345;">
+							<tbody> <!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<h2>_________________________________________________________________________________________________
+					</h2>
+					<br>
+					<table id="tablaFilterjobCode" style="display: inline-block;">
+						<tbody>
+							<tr>
+								<th>jobCode</th>
+							</tr>
+							<tr>
+								<td>
+									<input type="text" id="jobCode1" value="">
+									<input type="checkbox" id="checkOnlineTask" value="" onchange="onlineTask()">Online</inpunt></td>
+							</tr>
+						</tbody>
+					</table>
+					<br>
+					<span>
+						<table id="outputTableTaskQuery" style="background-color: #012345;">
+							<tbody> <!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+
+				</div>
+			</div>
+
+
+			<div id="tab2" class="tab">
+				<a href="#tab2">AMRs</a>
+				<div class="tab-content">
+					<h1>Robot Form</h1>
+					<br>
+					<span id="spanRobotQuery" style="display: inline-block;">
+						<br>
+						<button id="reset" onclick="resetAMR()">Reset</button>
+						<br>
+						<table id="tablaFilterShowAMR" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>ID del Robot</th>
+									<th>robotType</th>
+									<th>floorNumber</th>
+									<th>mapCode</th>
+								</tr>
+								<tr>
+									<td><input type="text" id="robotIdAMR4" value=""></td>
+									<td><input type="text" id="robotTypeAMR4" value=""></td>
+									<td><input type="text" id="floorNumberAMR4" value=""></td>
+									<td><input type="text" id="mapCodeAMR4" value=""></td>
+								</tr>
+							</tbody>
+						</table>
+						<br>
+						<br>
+						<!-- <button id="infoAMR">Info AMR</button> -->
+						<button id="showAMR" onclick="robotQuery()">robotQuery</button>
+						<input type="checkbox" id="checkOnlineAMR" value="" onchange="onlineAMR()">Online</inpunt>
+						<label for="intervalQueryAMR1">interval(s):</label>
+						<input type="text" id="intervalQueryAMR1" style="width: 50px;" value="5">
+					</span>
+
+					<span id="spanSubMission" style="display: none;">
+						<h2>SubMission AMR</h2>
+
+						<table id="tablaFilterSubMissionAMR" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>ID AMR</th>
+									<th>robotType</th>
+									<th>mapCode/floorNumber</th>
+									<th>missionType</th>
+									<th>containerCode</th>
+									<th>Nodo Destino1</th>
+									<th>Nodo Destino2</th>
+								</tr>
+								<tr>
+									<td><input type="text" id="robotIdAMR5" value=""></td>
+									<td><select name="robotTypeAMR5" id="robotTypeAMR5">
+											<option value="LIFT">LIFT</option>
+											<option value="ROLLER">ROLLER</option>
+											<option value="PICKER">PICKER</option>
+											<option value="FORKLIFT">FORKLIFT</option>
+											<option value="HCSBOX">HCSBOX</option>
+										</select></td>
+									<td>
+										<input type="text" id="mapCodeAMR5" value="">
+										<br>
+										<input type="text" id="floorNumberAMR5" value="">
+									</td>
+									<td><select name="missionTypeAMR5" id="missionTypeAMR5">
+											<option value="MOVE">MOVE</option>
+											<option value="FORKLIFT_MOVE">FORKLIFT_MOVE</option>
+											<option value="PICKER_MOVE">PICKER_MOVE</option>
+											<option value="ROLLER_MOVE">ROLLER_MOVE</option>
+											<option value="RACK_MOVE">RACK_MOVE</option>
+										</select></td>
+									<td><select name="containerCodeAMR5" id="containerCodeAMR5" class="readonly"
+											disabled="true">
+											<option value=" "> </option>
+										</select></td>
+									<td><input type="text" id="positionAMR5" value=""></td>
+									<td><input type="text" id="positionAMR25" value="" class="readonly" readonly="true">
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<br>
+						<br>
+						<!-- <button id="SubMission">SubMission</button> -->
+						<button id="subMission" onclick="subMission()">SubMission</button>
+						<button id="regresarMenuRobot" onclick="regresarMenuRobot()">Regresar</button>
+					</span>
+					<br>
+					<br>
+					<h2><label
+							id="labelResponseAMR">_____________________________________Response___________________________________________________</label>
+					</h2>
+					<span>
+						<table id="outputTableAMR" style="background-color: #012345;">
+							<tbody>
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+					<h2>_________________________________________________________________________________________________
+					</h2>
+					<br>
+					<br>
+
+				</div>
+			</div>
+
+			<div id="tab1" class="tab">
+				<a href="#tab1">Containers</a>
+				<div class="tab-content">
+					<h1>Container Form</h1>
+					<br>
+					<!-- <h2><label id="labelContainer">_____________________________________spanQuery___________________________________________________</label></h2> -->
+					<span id="spanQuery" style="display: inline-block;">
+						<br>
+						<button id="reset" onclick="reset()">Reset</button>
+						<table id="tablaFilterShowContainer" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>containerCode</th>
+									<th>nodeCode</th>
+									<th>mapCode</th>
+									<th>districtCode</th>
+									<th>containerModelCode</th>
+									<th>areaCode</th>
+									<th>emptyFullStatus</th>
+									<th>inMapStatus</th>
+									<!-- <th>QueryContainer Type</th> -->
+								</tr>
+								<tr>
+									<td><input type="text" id="containerCode0" value=""></td>
+									<td><input type="text" id="nodeCode0" value=""></td>
+									<td><input type="text" id="mapCode0" value=""></td>
+									<td><input type="text" id="districtCode0" value=""></td>
+									<!-- <td><input type="text" id="containerModelCode0" value=""></td> -->
+									<td>
+										<select name="containerModelCode0" id="containerModelCode0"
+											style="text-align:center;">
+											<option value=""></option>
+										</select>
+									</td>
+									<td>
+										<select name="areaCode0" id="areaCode0">
+											<option value=""></option>
+										</select>
+									</td>
+									<td>
+										<select name="emptyFullStatus0" id="emptyFullStatus0">
+											<option value=""></option>
+											<option value="1">FULL</option>
+											<option value="0">EMPTY</option>
+										</select>
+									</td>									
+									<td>
+										<select name="inMapStatus0" id="inMapStatus0">
+											<option value="1">IN MAP</option>
+											<option value="0">OUT MAP</option>
+											<option value="">IN/OUT MAP</option>
+										</select>
+									</td>
+									<!-- <td>
+										<select name="QueryContainerType0" id="QueryContainerType0">
+											<option value="IN/INSERTED">Only IN/INSERTED containers</option>
+											<option value="Both">Both IN/INSERTED and OUT/REMOVED containers</option>
+										</select>
+									</td> -->
+								</tr>
+							</tbody>
+						</table>
+
+						<br>
+						<button id="infoContainer" onclick="showContainer()">containerQuery</button>
+						<input type="checkbox" id="checkOnlineContainer" value="" onchange="onlineContainer()">Online
+						</inpunt>
+						<label for="intervalQueryConatiner1">interval(s):</label>
+						<input type="text" id="intervalQueryContainer1" style="width: 50px;" value="5">
+						<!-- <button id="infoContainer">containerQuery</button> -->
+					</span>
+
+					<span id="spanInsertCreate" style="display: none;">
+						<!-- _____________________________________spanInsertCreate___________________________________________________-->
+
+						<table id="tablaFilterInsertContainer" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>containerCode</th>
+									<th>position</th>
+									<th>containerModelCode</th>
+									<th>containerType</th>
+									<th>enterOrientation</th>
+								</tr>
+								<tr>
+									<td><input type="text" id="containerCode2" value=""></td>
+									<td><input type="text" id="position2" value="Lab1-D1-"></td>
+									<td><select name="containerModelCode2" id="containerModelCode2">
+											<option value=""></option>
+										</select></td>
+									<td><select name="containerType2" id="containerType2">
+											<option value="Tray(AMR)">Tray(AMR)</option>
+											<option value="Rack">Rack</option>
+											<option value="Tray(Forklift)">Tray(Forklift)</option>
+											<option value="Mobile Box-Shelf">Tray(Forklift)</option>
+										</select></td>
+									<td><input type="text" id="enterOrientation2" value="90"></td>
+								</tr>
+							</tbody>
+						</table>
+
+						<br>
+						<!-- <button id="insertContainer">Insert/Create</button> -->
+						<button id="insertContainer" onclick="insertContainer()">Submit</button>
+						<select name="isNew2" id="isNew2">
+							<option value="true">Create🆕</option>
+							<option value="false">⬅️Insert</option>
+						</select>
+						&nbsp
+						&nbsp
+						&nbsp
+						<button id="regresar" onclick="regresar()">Regresar</button>
+					</span>
+
+
+					<span id="spanUpdate" style="display: none;">
+
+						<table id="tablaFilterUpdateContainer" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>containerType</th>
+									<th>containerCode</th>
+									<th>originPosition</th>
+									<th>targetPosition</th>
+									<th>emptyStatus</th>
+									<th>reason</th>
+								</tr>
+								<tr>
+									<td><input type="text" id="containerType3" value="Tray(AMR)" class="readonly"
+											readonly></td>
+									<td><input type="text" id="containerCode3" value="" class="readonly" readonly></td>
+									<td><input type="text" id="originPosition3" value="" class="readonly" readonly></td>
+									<td><input type="text" id="targetPosition3" value=""></td>
+									<td><input type="text" id="emptyStatus3" value=""></td>
+									<td><input type="text" id="reason3" value=""></td>
+								</tr>
+							</tbody>
+						</table>
+						<br>
+						<!-- <button id="updateContainer">Update</button> -->
+						<button id="updateContainer" onclick="updateContainer()">Update</button>
+						&nbsp
+						&nbsp
+						&nbsp
+						<button id="regresar" onclick="regresar()">Regresar</button>
+					</span>
+
+					<span id="spanRemoveDelete" style="display: none;">
+
+
+						<table id="tablaFilterOutContainer" style="display: inline-block;">
+							<tbody>
+								<tr>
+									<th>containerCode</th>
+									<th>originPosition</th>
+									<th>position</th>
+								</tr>
+								<tr>
+									<td><input type="text" id="containerCode1" value=""></td>
+									<td><input type="text" id="containerType1" value="Tray(AMR)"></td>
+									<td><input type="text" id="position1" value="Lab1-D1-"></td>
+
+								</tr>
+							</tbody>
+						</table>
+						<br>
+						<!-- <button id="removeContainer">Submit</button> -->
+						<button id="removeContainer" onclick="removeContainer()">Submit</button>
+						<select name="isDelete1" id="isDelete1">
+							<option value="false">Remove</option>
+							<option value="true">Delete</option>
+						</select>
+						&nbsp
+						&nbsp
+						&nbsp
+						<button id="regresar" onclick="regresar()">Regresar</button>
+					</span>
+
+
+
+					<br>
+					<br>
+					<h2><label
+							id="labelResponseContainer">_____________________________________Response___________________________________________________</label>
+					</h2>
+					<span>
+						<table id="outputTableContainer" style="background-color: #012345;">
+							<tbody>
+								<!-- Los datos se insertarán aquí -->
+							</tbody>
+						</table>
+					</span>
+
+
+					<h2>_________________________________________________________________________________________________
+					</h2>
+
+
+					<!-- <span id="spanGetContainerModels" style="display: block;">
+					<button id="getContainerModelsButton" onclick="getContainerModels()">Get Model Palets</button>
+					<span>
+						<table id="outputTableModels">
+							<tbody>
+							</tbody>
+						</table>	
+						</span>
+				</span> -->
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- <span id=debug style="display: inline-block; visibility: hidden;">
+		<div id="header2" style="display: inline-block;">
+			<input type="file" id="inputJson" />
+			<br>
+			<a href="./viewDB.html" target="_blank"><u>OPEN VIEW DB</u></a>
+			&nbsp
+			&nbsp
+			&nbsp
+			&nbsp
+			<a href="./viewDB.html" target="_self"><u>Go DB ➡️</u></a>
+			<button id="butonTest1" onclick="Debug1()">Debug1</button>
+			<button id="butonTest2" onclick="Debug2()">Debug2</button>
+		</div>
+		<script>
+			document.getElementById("display-time").addEventListener("click", function () {
+				var debug = document.getElementById("debug");
+				if (debug.style.visibility == "hidden") {
+					debug.style.visibility = "visible";
+				} else {
+					document.getElementById("debug").hidden = "true";
+					debug.style.visibility = "hidden";
+				}
+			});
+		</script>
+	</span> -->
+
+
+
+	<script src="js/containerQuery.js"></script>
+	<script src="js/robotQuery.js"></script>
+	<script src="js/missionQuery.js"></script>
+	<script src="js/main.js"></script>
+	<script src="js/jobQuery.js"></script>
+	<!-- <script src="js/fetch.js"></script> -->
+	<script type="text/javascript" src="js/dataDB.json"></script>
+	<script src="js/test.js"></script>
+</body>
+
+</html>

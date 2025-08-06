@@ -19,7 +19,8 @@
   </style>
 </head>
 <body>
-  <!-- Login Panel -->
+  
+  <!-- Login Panel 
   <div class="modal fade" id="loginModal"
        data-bs-backdrop="static" data-bs-keyboard="false"
        tabindex="-1" aria-labelledby="loginModalLabel"
@@ -61,7 +62,7 @@
       </div>
     </div>
   </div>
-
+-->
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light py-3">
     <div class="container">
@@ -102,7 +103,7 @@
         <span class="input-group-text"><i class="bi bi-hdd-rack"></i></span>
         <input type="text"
                class="form-control"
-               id="fleetIP"
+               id="kmresIP"
                placeholder="KUKA AMR Fleet IP"
                aria-label="Fleet IP">
         <button class="btn btn-primary"
@@ -123,56 +124,47 @@
 
   <!-- Tab Panelleri -->
   <div class="tab-content mt-4 container" id="amrTabContent">
-    <div class="tab-pane fade" id="submissions" role="tabpanel" aria-labelledby="submissions-tab">
-      <form id="submissionsForm" class="p-4 border rounded bg-white">
-        <h2 class="mb-4">Alt Görevler Formu</h2>
-        <div class="row g-3 mb-3">
-          <div class="col-md-6">
-            <label for="robotIdSub" class="form-label">ID AMR</label>
-            <input type="text" id="robotIdSub" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label for="missionTypeSub" class="form-label">Mission Tipi</label>
-            <select id="missionTypeSub" class="form-select">
-              <option value="MOVE">MOVE</option>
-              <option value="PICKER_MOVE">PICKER_MOVE</option>
-              <option value="ROLLER_MOVE">ROLLER_MOVE</option>
-              <option value="FORKLIFT_MOVE">FORKLIFT_MOVE</option>
-              <option value="RACK_MOVE">RACK_MOVE</option>
-            </select>
-          </div>
-        </div>
-        <div class="row g-3 mb-3">
-          <div class="col-md-6">
-            <label for="mapCodeSub" class="form-label">mapCode</label>
-            <input type="text" id="mapCodeSub" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label for="floorNumberSub" class="form-label">floorNumber</label>
-            <input type="text" id="floorNumberSub" class="form-control">
-          </div>
-        </div>
-        <div class="row g-3 mb-4">
-          <div class="col-md-6">
-            <label for="position1Sub" class="form-label">Nodo Destino 1</label>
-            <input type="text" id="position1Sub" class="form-control">
-          </div>
-          <div class="col-md-6">
-            <label for="position2Sub" class="form-label">Nodo Destino 2</label>
-            <input type="text" id="position2Sub" class="form-control" readonly>
-          </div>
-        </div>
-        <button type="button" class="btn btn-success me-2" onclick="subMission()">Alt Görev Başlat</button>
-        <button type="button" class="btn btn-secondary" onclick="regresarMenuRobot()">Geri</button>
-        <hr class="my-4">
-        <h5>Response</h5>
-        <table class="table table-sm mt-2" id="outputTableMission">
-          <tbody>
-            <!-- Yanıt buraya gelecek -->
-          </tbody>
-        </table>
-      </form>
-    </div>
+<div
+  class="tab-pane fade show"
+  id="submissions"
+  role="tabpanel"
+  aria-labelledby="submissions-tab"
+>
+  <form class="p-4 border rounded bg-white">
+    <h2 class="mb-4">Alt Görev Kontrol</h2>
+
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th></th>
+          <th>RobotID</th>
+          <th>Layout / District</th>
+          <th>Mission Code</th>
+          <th>Interval (s)</th>
+          <th>Force / Start–Stop</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox" id="wfCheckbox" checked disabled></td>
+          <td><input type="text" id="robotIdCtrl"    class="form-control" placeholder="RobotID"></td>
+          <td>
+            <input type="text" id="layoutCtrl"   class="form-control d-inline-block" style="width:4rem" placeholder="Lab">
+            /
+            <input type="text" id="districtCtrl" class="form-control d-inline-block" style="width:4rem" placeholder="D1">
+          </td>
+          <td><input type="text" id="codeCtrl"     class="form-control" placeholder="W00000001"></td>
+          <td><input type="number" id="intervalCtrl" class="form-control d-inline-block" style="width:4rem" value="5" min="1"></td>
+          <td>
+            <button type="button" id="forceBtn"  class="btn btn-sm btn-warning me-2">Force</button>
+            <button type="button" id="toggleBtn" class="btn btn-sm btn-info">Start</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+</div>
+
     <div class="tab-pane fade show active" id="workflows" role="tabpanel" aria-labelledby="workflows-tab">
       <form class="p-4 border rounded bg-white">
         <h2 class="mb-4">Özelleştiriliş Butonlar Formu</h2>
@@ -193,5 +185,6 @@
           integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
           crossorigin="anonymous"> </script>
   <script src="main.js"></script>
+  <script src="api.js"></script>
 </body>
 </html>

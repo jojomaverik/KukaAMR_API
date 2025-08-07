@@ -130,44 +130,41 @@ function updateCell(i, totalSec) {
           .textContent = `${m}:${s}`;
 }
 
-// — 7) Force veya normal çağrı — //
-// --- Alt Görev API çağrısını yapan yardımcı fonksiyon ---
+// 7) Force veya normal WorkFlow çağrısı — güncellendi!
 async function runSubMissionRow(i, force = false) {
-  // 1) Kontrollerden değerleri al
-  const robotId  = document.getElementById(`robotIdCtrl_${i}`).value.trim();
-  const layout   = document.getElementById(`layoutCtrl_${i}`).value.trim();
-  const district = document.getElementById(`districtCtrl_${i}`).value.trim();
-  const code     = document.getElementById(`codeCtrl_${i}`).value.trim();
-  const interval = (parseInt(
-    document.getElementById(`intervalCtrl_${i}`).value, 10
-  ) || 5) * 1000;
+  // 1. Input’ları oku
+  const robotId     = document.getElementById(`robotIdCtrl_${i}`).value.trim();
+  const layout      = document.getElementById(`layoutCtrl_${i}`).value.trim();
+  const district    = document.getElementById(`districtCtrl_${i}`).value.trim();
+  const templateCode= document.getElementById(`codeCtrl_${i}`).value.trim();
 
-  // 2) Payload’u oluştur
-  const url  = getBaseUrl() + 'submitMission';
+  // 2. missionCode & requestId oluştur (örnekteki format)
+  const now       = new Date();
+  const timeStamp = now.getMilliseconds() + "-" + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+  const station   = i;
+  const missionCode = `RW-${station}--${timeStamp}`;
+
+  // 3. Payload’u örnekteki gibi hazırla
+  const url = getBaseUrl() + 'submitMission';
   const body = {
-    robotIds:    [robotId],
-    orgId:       `${layout}-${district}`,
-    requestId:   `req-${Date.now()}`,
-    missionCode: code,
-    missionType: 'MOVE',
-    missionData: [
-      {
-        sequence:      1,
-        position:      code,           // ← Mutlaka gönderilen pozisyon
-        type:          "NODE_POINT",   // ← API dokümanında belirtildiği gibi
-        passStrategy:  'AUTO',
-        waitingMillis: interval
-      }
-    ],
-    force: force
+    orgId:       `${layout}-${district}`, // ör. Lab-D1
+    requestId:   missionCode,             // ör. "RW-1--123-14:05:09"
+    missionCode: missionCode,             // aynı değer
+    missionType: 'RACK_MOVE',             // sabit
+    robotIds:    [robotId],               // dizi içinde robot ID
+    templateCode: templateCode,           // input’tan gelen şablon kodu
+    force:       force                    // örnekte yok ama ekledik
   };
 
-  // 3) Çağrıyı yap ve sonucu göster
+  console.log('Submitting WorkFlow:', body);
+
+  // 4. Çağrıyı yap ve sonucu göster
   try {
     const resp = await appFetch(url, body, 'POST');
     document.getElementById('submissionResponse')
             .textContent = JSON.stringify(resp, null, 2);
   } catch (e) {
+    console.error(e);
     document.getElementById('submissionResponse')
             .textContent = 'Hata: ' + e.message;
   }

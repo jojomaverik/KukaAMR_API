@@ -65,7 +65,7 @@ async function subMission() {
     missionData: [
       {
         sequence:      1,
-        position:      missionCode,            // tek bir node gönderiyorsan burada kodu kullandık
+        position:      missionCode,            
         type:          "NODE_POINT",
         passStrategy:  "AUTO",
         waitingMillis: intervalSec * 1000
@@ -84,9 +84,6 @@ async function subMission() {
 
 // Event listener’ı da kesin şu id’ye bağla:
 document.getElementById('toggleBtn').addEventListener('click', subMission);
-
-
-
 
 
 // --- 3) Özel Workflow Başlat ------------------------------------
@@ -194,20 +191,64 @@ async function showContainer() {
 }
 
 
-//  --- 6) Event Listener’lar  ------------------------------------
+// api.js (at the bottom)
 
-document.getElementById('saveIPBtn').addEventListener('click', () => {
-  localStorage.setItem('kmresIP', document.getElementById('kmresIP').value);
-  alert('IP kaydedildi.');
+// --- X) Var olan bir job'u çalıştır / sorgula ---------------
+async function runJob() {
+  const base  = getBaseUrl();
+  const jobId = document.getElementById('codeCtrl').value.trim();
+  if (!jobId) return alert('Lütfen bir Mission Code girin');
+  
+  const url     = base + 'jobQuery';
+  const payload = { missionId: jobId };
+
+  console.log('runJob payload:', payload);
+  try {
+    const resp = await appFetch(url, payload, 'POST');
+    renderMissionResponse(resp);
+  } catch (e) {
+    alert(`Job ${jobId} çalıştırılamadı: ` + e);
+  }
+}
+
+// --- 6) Event Listener’lar & Toggle Timer  --------------------
+
+// IP kaydetme
+document.getElementById('saveIPBtn')
+  .addEventListener('click', () => {
+    localStorage.setItem('kmresIP', document.getElementById('kmresIP').value);
+    alert('IP kaydedildi.');
+  });
+
+// Force butonu (örnek)
+document.getElementById('forceBtn')
+  .addEventListener('click', () => {
+    alert('Force komutu yollandı.');
+  });
+
+// toggleBtn artık sadece tek seferlik değil, interval’li çalıştırıyor
+let jobIntervalId = null;
+const toggleBtn   = document.getElementById('toggleBtn');
+
+toggleBtn.addEventListener('click', () => {
+  if (jobIntervalId) {
+    // Eğer zaten interval çalışıyorsa: durdur
+    clearInterval(jobIntervalId);
+    jobIntervalId = null;
+    toggleBtn.textContent = 'Start';
+    toggleBtn.classList.replace('btn-danger', 'btn-info');
+  } else {
+    // İlk çağrı hemen
+    runJob();
+    // Interval süresini oku (saniye cinsinden)
+    const sec = parseInt(document.getElementById('intervalCtrl').value, 10) || 5;
+    // Tekrarlı çağrı
+    jobIntervalId = setInterval(runJob, sec * 1000);
+    toggleBtn.textContent = 'Stop';
+    toggleBtn.classList.replace('btn-info', 'btn-danger');
+  }
 });
-document.getElementById('toggleBtn').addEventListener('click', subMission);
-document.getElementById('forceBtn').addEventListener('click', () => {
-  alert('Force komutu yollandı.');
-});
 
-// Formlardaki “Alt Görev Başlat” ve “Başlat” butonları
-document.querySelector('[onclick="subMission()"]').addEventListener('click', subMission);
-document.querySelector('[onclick="startWorkflow()"]').addEventListener('click', startWorkflow);
+// ihtiyaç olursa butona bağlı diğer click handler’ları kaldırın:
 
-window.subMission = subMission;
 

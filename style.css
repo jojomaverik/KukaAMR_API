@@ -1,5 +1,18 @@
-
+/* Tab içerisi başlık rengi */
 #amrTabContent .table thead th {
   background-color: #f25c19 !important;
   color: #fff !important;
+}
+
+/* Eskiden inline olarak index.html içindeydi */
+.navbar {
+  min-height: 70px;
+}
+
+.spacing {
+  margin-top: 60px;
+}
+
+.leftspace {
+  margin-left: 50px;
 }

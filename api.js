@@ -1,14 +1,14 @@
 // api.js
 
-// --- 1) Yardımcı fonksiyonlar ------------------------------------
-
-// KUKA AMR Fleet API temel URL’ini getirir
+// --- 1) Temel URL & Fetch Wrapper -------------------------------
 function getBaseUrl() {
-  const ip = document.getElementById('kmresIP').value;
+  const ip = document.getElementById('kmresIP').value.trim();
+  if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+    throw new Error('Geçersiz IP adresi');
+  }
   return `http://${ip}:10870/interfaces/api/amr/`;
 }
 
-// Genel fetch wrapper
 async function appFetch(url, data, method = 'POST') {
   try {
     const opts = {
@@ -16,7 +16,9 @@ async function appFetch(url, data, method = 'POST') {
       headers: { 'Content-Type': 'application/json' }
     };
     if (method !== 'GET') opts.body = JSON.stringify(data);
+
     const res = await fetch(url, opts);
+    if (!res.ok) throw new Error(`Sunucu hata: ${res.status}`);
     return await res.json();
   } catch (e) {
     console.error('API hata:', e);
@@ -24,231 +26,8 @@ async function appFetch(url, data, method = 'POST') {
   }
 }
 
-
-// --- 2) Alt Görev (SubMission) ----------------------------------
-
-// Tabloya gelen cevabı basar
+// --- 2) Alt Görev Sonuçlarını Görüntüleme -----------------------
 function renderMissionResponse(resp) {
-  const tb = document.querySelector('#outputTableMission tbody');
-  tb.innerHTML = `
-    <tr>
-      <th>data</th><th>code</th><th>message</th><th>success</th>
-    </tr>
-    <tr>
-      <td>${resp.data}</td>
-      <td>${resp.code}</td>
-      <td>${resp.message}</td>
-      <td>${resp.success}</td>
-    </tr>`;
+  document.getElementById('submissionResponse')
+          .textContent = JSON.stringify(resp, null, 2);
 }
-
-// Alt görev gönderir
-// --- 2) Alt Görev (SubMission) ----------------------------------  
-// api.js içindeki subMission()’u şu şekilde değiştir:
-
-async function subMission() {
-  const base       = getBaseUrl();
-  // Yeni HTML id’leri:
-  const robotId    = document.getElementById('robotIdCtrl').value;
-  const mapCode    = document.getElementById('layoutCtrl').value;
-  const district   = document.getElementById('districtCtrl').value;
-  const missionCode= document.getElementById('codeCtrl').value;
-  const intervalSec= parseInt(document.getElementById('intervalCtrl').value, 10) || 5;
-
-  const url = base + 'submitMission';
-  const payload = {
-    orgId:       `${mapCode}-${district}-`,
-    requestId:   `req-${Date.now()}`,
-    missionCode,              // HTML’de girdiğin kod
-    missionType: 'MOVE',      // sabit veya bir select’ten okuyabilirsin
-    robotIds:    [robotId],
-    missionData: [
-      {
-        sequence:      1,
-        position:      missionCode,            
-        type:          "NODE_POINT",
-        passStrategy:  "AUTO",
-        waitingMillis: intervalSec * 1000
-      }
-    ]
-  };
-
-  console.log('subMission payload:', payload);
-  try {
-    const resp = await appFetch(url, payload, 'POST');
-    renderMissionResponse(resp);
-  } catch (e) {
-    alert('Görev gönderilirken hata: ' + e);
-  }
-}
-
-// Event listener’ı da kesin şu id’ye bağla:
-document.getElementById('toggleBtn').addEventListener('click', subMission);
-
-
-// --- 3) Özel Workflow Başlat ------------------------------------
-
-// Tabloya gelen cevabı basar (aynı renderMissionResponse da kullanılabilir)
-async function startWorkflow() {
-  const kmresIP = getBaseUrl();
-  const url     = kmresIP + 'submitMission';
-  const templateCode = document.getElementById('workflow6').value;
-  const mapCode  = document.getElementById('mapCode6').value;
-  const floorNo  = document.getElementById('floorNumber6').value;
-
-  const payload = {
-    orgId:       `${mapCode}-${floorNo}-`,
-    requestId:   `req-${Date.now()}`,
-    missionCode: `msn-${Date.now()}`,
-    missionType: 'RACK_MOVE',
-    templateCode
-  };
-
-  try {
-    const resp = await appFetch(url, payload, 'POST');
-    renderMissionResponse(resp);
-  } catch (e) {
-    alert('Workflow başlatılırken hata: ' + e);
-  }
-}
-
-
-// --- 4) Robot Sorgu (Show AMR) -----------------------------------
-
-function renderRobotResponse(data) {
-  const tb = document.querySelector('#outputTableAMR tbody');
-  let html = `
-    <tr>
-      <th>Robot ID</th><th>Tip</th><th>Map</th><th>Floor</th>
-      <th>containerCode</th><th>status</th><th>missionCode</th><th>nodeCode</th>
-    </tr>`;
-  data.forEach(d => {
-    html += `<tr>
-      <td class="link_tabla">${d.robotId}</td>
-      <td>${d.robotType}</td>
-      <td>${d.mapCode}</td>
-      <td>${d.floorNumber}</td>
-      <td>${d.containerCode}</td>
-      <td>${d.status}</td>
-      <td>${d.missionCode}</td>
-      <td>${d.nodeCode}</td>
-    </tr>`;
-  });
-  tb.innerHTML = html;
-}
-
-async function showAMR() {
-  const kmresIP   = getBaseUrl();
-  const robotId   = document.getElementById('robotIdCtrl').value;
-  const mapCode   = document.getElementById('layoutCtrl').value + '-' + document.getElementById('districtCtrl').value;
-  const url       = kmresIP + 'robotQuery';
-  const payload   = { floorNumber:"", mapCode, robotId, robotType:"" };
-
-  try {
-    const resp = await appFetch(url, payload, 'POST');
-    if (resp.data && resp.data.length) renderRobotResponse(resp.data);
-    else alert('Robot verisi bulunamadı.');
-  } catch (e) {
-    alert('Robot sorgulama hatası: ' + e);
-  }
-}
-
-
-// --- 5) Container Sorgu -----------------------------------------
-
-function renderContainerResponse(data) {
-  const tb = document.querySelector('#outputTableContainer tbody');
-  let html = '<tr><th>containerCode</th><th>nodeCode</th><th>model</th><th>area</th><th>full?</th></tr>';
-  data.forEach(c => {
-    html += `<tr>
-      <td>${c.containerCode}</td>
-      <td>${c.nodeCode}</td>
-      <td>${c.containerModelCode}</td>
-      <td>${c.areaCode}</td>
-      <td>${c.emptyFullStatus}</td>
-    </tr>`;
-  });
-  tb.innerHTML = html;
-}
-
-async function showContainer() {
-  const kmresIP                 = getBaseUrl();
-  const code = document.getElementById('containerCode0').value;
-  const node = document.getElementById('nodeCode0').value;
-  const model= document.getElementById('containerModelCode0').value;
-  const area = document.getElementById('areaCode0').value;
-  const status=document.getElementById('emptyFullStatus0').value;
-  const url = kmresIP + 'containerQuery';
-  const payload = { containerCode:code, nodeCode:node, containerModelCode:model, areaCode:area, emptyFullStatus:status };
-
-  try {
-    const resp = await appFetch(url, payload, 'POST');
-    if (resp.data) renderContainerResponse(resp.data);
-    else alert('Container verisi bulunamadı.');
-  } catch (e) {
-    alert('Container sorgulama hatası: ' + e);
-  }
-}
-
-
-// api.js (at the bottom)
-
-// --- X) Var olan bir job'u çalıştır / sorgula ---------------
-async function runJob() {
-  const base  = getBaseUrl();
-  const jobId = document.getElementById('codeCtrl').value.trim();
-  if (!jobId) return alert('Lütfen bir Mission Code girin');
-  
-  const url     = base + 'jobQuery';
-  const payload = { missionId: jobId };
-
-  console.log('runJob payload:', payload);
-  try {
-    const resp = await appFetch(url, payload, 'POST');
-    renderMissionResponse(resp);
-  } catch (e) {
-    alert(`Job ${jobId} çalıştırılamadı: ` + e);
-  }
-}
-
-// --- 6) Event Listener’lar & Toggle Timer  --------------------
-
-// IP kaydetme
-document.getElementById('saveIPBtn')
-  .addEventListener('click', () => {
-    localStorage.setItem('kmresIP', document.getElementById('kmresIP').value);
-    alert('IP kaydedildi.');
-  });
-
-// Force butonu (örnek)
-document.getElementById('forceBtn')
-  .addEventListener('click', () => {
-    alert('Force komutu yollandı.');
-  });
-
-// toggleBtn artık sadece tek seferlik değil, interval’li çalıştırıyor
-let jobIntervalId = null;
-const toggleBtn   = document.getElementById('toggleBtn');
-
-toggleBtn.addEventListener('click', () => {
-  if (jobIntervalId) {
-    // Eğer zaten interval çalışıyorsa: durdur
-    clearInterval(jobIntervalId);
-    jobIntervalId = null;
-    toggleBtn.textContent = 'Start';
-    toggleBtn.classList.replace('btn-danger', 'btn-info');
-  } else {
-    // İlk çağrı hemen
-    runJob();
-    // Interval süresini oku (saniye cinsinden)
-    const sec = parseInt(document.getElementById('intervalCtrl').value, 10) || 5;
-    // Tekrarlı çağrı
-    jobIntervalId = setInterval(runJob, sec * 1000);
-    toggleBtn.textContent = 'Stop';
-    toggleBtn.classList.replace('btn-info', 'btn-danger');
-  }
-});
-
-// ihtiyaç olursa butona bağlı diğer click handler’ları kaldırın:
-
-

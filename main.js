@@ -1,34 +1,55 @@
 // main.js
 
-// — Yardımcılar — //
+// Yardımcı delay (isteğe bağlı)
 const delay = s => new Promise(r => setTimeout(r, s * 1000));
-const intervals = {};         // Her satır için interval ID’leri
-let mainTimerId = null;       // Ana timer
+
+// State
+const intervals = {};
+let mainTimerId = null;
 let mainTimerSeconds = 0;
 
-// — 1) DOMContentLoaded — //
+// DOMContentLoaded
 window.addEventListener('DOMContentLoaded', () => {
-  // a) Ana timer
+  // Tarih/Saat güncelleme
+  const dateDiv = document.getElementById('date-div');
+  function updateClock() {
+    const now = new Date();
+    dateDiv.textContent = now.toLocaleString('tr-TR', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Wi-Fi icon kontrolü
+  document.getElementById('saveIPBtn')
+          .addEventListener('click', async () => { await checkConnection(); });
+
+  // Main timer start/stop
   document.getElementById('startStopMainTimerWorkFlows')
           .addEventListener('click', toggleMainTimer);
-  // b) Kaç satır
-  const nInp = document.getElementById('nWorkFlows');
-  nInp.addEventListener('change', renderWorkFlowRows);
-  // c) Hepsini başlat/durdur
+
+  // Number-of-rows change
+  document.getElementById('nWorkFlows')
+          .addEventListener('change', renderWorkFlowRows);
+
+  // Start/Stop All
   document.getElementById('startStopAllWorkFlows')
           .addEventListener('click', () => {
-    for (let i=1; i<= getRowCount(); i++) {
-      toggleWorkFlow(i);
-    }
+    for (let i = 1; i <= getRowCount(); i++) toggleWorkFlow(i);
   });
-  // d) Hepsini sıfırla
+
+  // Reset All
   document.getElementById('resetAllWorkFlows')
           .addEventListener('click', () => {
-    for (let i=1; i<= getRowCount(); i++) {
+    for (let i = 1; i <= getRowCount(); i++) {
       clearInterval(intervals[i]);
       intervals[i] = null;
       updateCell(i, 0);
-      setButtonText(i, 'Start');
+      const btn = document.getElementById(`toggleBtn_${i}`);
+      btn.textContent = 'Start';
+      btn.classList.replace('btn-danger', 'btn-info');
     }
   });
 
@@ -36,31 +57,46 @@ window.addEventListener('DOMContentLoaded', () => {
   renderWorkFlowRows();
 });
 
-// — 2) Satır sayısını döner — //
+// Bağlantı testi: /nodes endpoint’ine GET
+async function checkConnection() {
+  const wifiIcon = document.getElementById('wifiIcon');
+  try {
+    await appFetch(getBaseUrl() + 'nodes', null, 'GET');
+    // Bağlı
+    wifiIcon.classList.remove('bi-wifi-off', 'text-danger');
+    wifiIcon.classList.add('bi-wifi', 'text-success');
+    wifiIcon.title = 'Bağlı';
+  } catch {
+    // Bağlı değil
+    wifiIcon.classList.remove('bi-wifi', 'text-success');
+    wifiIcon.classList.add('bi-wifi-off', 'text-danger');
+    wifiIcon.title = 'Bağlı değil';
+  }
+}
+
+// Kaç satır var?
 function getRowCount() {
   return parseInt(document.getElementById('nWorkFlows').value, 10) || 1;
 }
 
-// — 3) Tablo satırlarını yeniden çiz — //
+// Dinamik tablo oluştur
 function renderWorkFlowRows() {
   const tbody = document.getElementById('tbodyWorkFlows');
   tbody.innerHTML = '';
   const n = getRowCount();
 
-  for (let i=1; i<=n; i++) {
+  for (let i = 1; i <= n; i++) {
     const tr = document.createElement('tr');
     tr.id = `row_${i}`;
     tr.innerHTML = `
       <td>${i}</td>
-      <td><input id="robotIdCtrl_${i}"  class="form-control" placeholder="RobotID"></td>
+      <td><input id="robotIdCtrl_${i}" class="form-control" placeholder="RobotID"></td>
       <td>
-        <input id="layoutCtrl_${i}"   class="form-control d-inline-block" style="width:4rem" placeholder="Lab">
-        /
+        <input id="layoutCtrl_${i}" class="form-control d-inline-block" style="width:4rem" placeholder="Lab"> /
         <input id="districtCtrl_${i}" class="form-control d-inline-block" style="width:4rem" placeholder="D1">
       </td>
-      <td><input id="codeCtrl_${i}"  class="form-control" placeholder="W00000001"></td>
-      <td><input id="intervalCtrl_${i}" class="form-control d-inline-block" style="width:4rem"
-                 type="number" value="5" min="1"></td>
+      <td><input id="codeCtrl_${i}" class="form-control" placeholder="W00000001"></td>
+      <td><input id="intervalCtrl_${i}" class="form-control d-inline-block" style="width:4rem" type="number" value="5" min="1"></td>
       <td id="timerCell_${i}">0:00</td>
       <td>
         <button type="button" id="forceBtn_${i}" class="btn btn-sm btn-warning me-1">Force</button>
@@ -68,7 +104,6 @@ function renderWorkFlowRows() {
       </td>`;
     tbody.appendChild(tr);
 
-    // O satırın düğmelerine click handler ekle
     document.getElementById(`forceBtn_${i}`)
             .addEventListener('click', () => runSubMissionRow(i, true));
     document.getElementById(`toggleBtn_${i}`)
@@ -76,16 +111,17 @@ function renderWorkFlowRows() {
   }
 }
 
-// — 4) Start/Stop ana timer — //
+// Main timer
 function toggleMainTimer() {
-  const btn = document.getElementById('startStopMainTimerWorkFlows');
+  const btn  = document.getElementById('startStopMainTimerWorkFlows');
   const disp = document.getElementById('mainFlowTimer');
+
   if (!mainTimerId) {
     mainTimerId = setInterval(() => {
       mainTimerSeconds++;
-      const h = Math.floor(mainTimerSeconds/3600);
-      const m = Math.floor((mainTimerSeconds%3600)/60).toString().padStart(2,'0');
-      const s = (mainTimerSeconds%60).toString().padStart(2,'0');
+      const h = Math.floor(mainTimerSeconds / 3600);
+      const m = Math.floor((mainTimerSeconds % 3600) / 60).toString().padStart(2, '0');
+      const s = (mainTimerSeconds % 60).toString().padStart(2, '0');
       disp.textContent = `${h}:${m}:${s}`;
     }, 1000);
     btn.textContent = 'Stop Timer';
@@ -96,16 +132,13 @@ function toggleMainTimer() {
   }
 }
 
-// — 5) Her satır için Start/Stop — //
+// Her satır için Start/Stop
 function toggleWorkFlow(i) {
   const btn = document.getElementById(`toggleBtn_${i}`);
+
   if (!intervals[i]) {
-    // 1) İlk tetikleme
     runSubMissionRow(i, false);
-    // 2) Döngüye al
-    const sec = parseInt(
-      document.getElementById(`intervalCtrl_${i}`).value, 10
-    ) || 5;
+    const sec = parseInt(document.getElementById(`intervalCtrl_${i}`).value, 10) || 5;
     let counter = 0;
     intervals[i] = setInterval(() => {
       counter++;
@@ -113,52 +146,46 @@ function toggleWorkFlow(i) {
       runSubMissionRow(i, false);
     }, sec * 1000);
     btn.textContent = 'Stop';
-    btn.classList.replace('btn-info','btn-danger');
+    btn.classList.replace('btn-info', 'btn-danger');
   } else {
     clearInterval(intervals[i]);
     intervals[i] = null;
     btn.textContent = 'Start';
-    btn.classList.replace('btn-danger','btn-info');
+    btn.classList.replace('btn-danger', 'btn-info');
   }
 }
 
-// — 6) Sayaç hücresini güncelle — //
+// Satır timer hücresi güncelle
 function updateCell(i, totalSec) {
-  const m = Math.floor(totalSec/60);
-  const s = (totalSec%60).toString().padStart(2,'0');
-  document.getElementById(`timerCell_${i}`)
-          .textContent = `${m}:${s}`;
+  const m = Math.floor(totalSec / 60);
+  const s = (totalSec % 60).toString().padStart(2, '0');
+  document.getElementById(`timerCell_${i}`).textContent = `${m}:${s}`;
 }
 
-// 7) Force veya normal WorkFlow çağrısı — güncellendi!
+// Template-based workflow çağrısı
 async function runSubMissionRow(i, force = false) {
-  // 1. Input’ları oku
-  const robotId     = document.getElementById(`robotIdCtrl_${i}`).value.trim();
-  const layout      = document.getElementById(`layoutCtrl_${i}`).value.trim();
-  const district    = document.getElementById(`districtCtrl_${i}`).value.trim();
-  const templateCode= document.getElementById(`codeCtrl_${i}`).value.trim();
+  const robotId      = document.getElementById(`robotIdCtrl_${i}`).value.trim();
+  const layout       = document.getElementById(`layoutCtrl_${i}`).value.trim();
+  const district     = document.getElementById(`districtCtrl_${i}`).value.trim();
+  const templateCode = document.getElementById(`codeCtrl_${i}`).value.trim();
 
-  // 2. missionCode & requestId oluştur (örnekteki format)
   const now       = new Date();
-  const timeStamp = now.getMilliseconds() + "-" + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-  const station   = i;
-  const missionCode = `RW-${station}--${timeStamp}`;
+  const stamp     = `${now.getMilliseconds()}-${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+  const missionCode = `RW-${i}--${stamp}`;
 
-  // 3. Payload’u örnekteki gibi hazırla
-  const url = getBaseUrl() + 'submitMission';
+  const url  = getBaseUrl() + 'submitMission';
   const body = {
-    orgId:       `${layout}-${district}`, // ör. Lab-D1
-    requestId:   missionCode,             // ör. "RW-1--123-14:05:09"
-    missionCode: missionCode,             // aynı değer
-    missionType: 'RACK_MOVE',             // sabit
-    robotIds:    [robotId],               // dizi içinde robot ID
-    templateCode: templateCode,           // input’tan gelen şablon kodu
-    force:       force                    // örnekte yok ama ekledik
+    orgId:        `${layout}-${district}`,
+    requestId:    missionCode,
+    missionCode:  missionCode,
+    missionType:  'RACK_MOVE',
+    robotIds:     [robotId],
+    templateCode: templateCode,
+    force:        force
   };
 
   console.log('Submitting WorkFlow:', body);
 
-  // 4. Çağrıyı yap ve sonucu göster
   try {
     const resp = await appFetch(url, body, 'POST');
     document.getElementById('submissionResponse')
@@ -169,4 +196,3 @@ async function runSubMissionRow(i, force = false) {
             .textContent = 'Hata: ' + e.message;
   }
 }
-

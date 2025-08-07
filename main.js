@@ -131,30 +131,38 @@ function updateCell(i, totalSec) {
 }
 
 // — 7) Force veya normal çağrı — //
-async function runSubMissionRow(i, force=false) {
+// --- Alt Görev API çağrısını yapan yardımcı fonksiyon ---
+async function runSubMissionRow(i, force = false) {
+  // 1) Kontrollerden değerleri al
   const robotId  = document.getElementById(`robotIdCtrl_${i}`).value.trim();
   const layout   = document.getElementById(`layoutCtrl_${i}`).value.trim();
   const district = document.getElementById(`districtCtrl_${i}`).value.trim();
   const code     = document.getElementById(`codeCtrl_${i}`).value.trim();
+  const interval = (parseInt(
+    document.getElementById(`intervalCtrl_${i}`).value, 10
+  ) || 5) * 1000;
 
+  // 2) Payload’u oluştur
   const url  = getBaseUrl() + 'submitMission';
   const body = {
-    robotIds: [robotId],
-    orgId:    `${layout}-${district}`,
-    requestId: `req-${Date.now()}`,
+    robotIds:    [robotId],
+    orgId:       `${layout}-${district}`,
+    requestId:   `req-${Date.now()}`,
     missionCode: code,
     missionType: 'MOVE',
-    missionData: [{
-      sequence: 1,
-      nodeId: code,
-      passStrategy: 'AUTO',
-      waitingMillis: (parseInt(
-        document.getElementById(`intervalCtrl_${i}`).value, 10
-      ) || 5) * 1000
-    }],
+    missionData: [
+      {
+        sequence:      1,
+        position:      code,           // ← Mutlaka gönderilen pozisyon
+        type:          "NODE_POINT",   // ← API dokümanında belirtildiği gibi
+        passStrategy:  'AUTO',
+        waitingMillis: interval
+      }
+    ],
     force: force
   };
 
+  // 3) Çağrıyı yap ve sonucu göster
   try {
     const resp = await appFetch(url, body, 'POST');
     document.getElementById('submissionResponse')
@@ -164,3 +172,4 @@ async function runSubMissionRow(i, force=false) {
             .textContent = 'Hata: ' + e.message;
   }
 }
+

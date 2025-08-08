@@ -1,13 +1,13 @@
 // main.js
 
-// Yardımcı delay (isteğe bağlı)
+// Yardımcı delay
 const delay = s => new Promise(r => setTimeout(r, s * 1000));
-// Hazır butonlar sabit değer değişimi ---
-const PRESET_ROBOT_ID   = '11';      
-const PRESET_LAYOUT     = '4';           
-const PRESET_DISTRICT   = '1';            
-const PRESET_TEMPLATE   = 'W000000033';   
 
+// Hazır butonlar sabit değerleri
+const PRESET_ROBOT_ID   = '11';
+const PRESET_LAYOUT     = '4';
+const PRESET_DISTRICT   = '1';
+const PRESET_TEMPLATE   = 'W000000033';
 
 // State
 const intervals = {};
@@ -16,7 +16,7 @@ let mainTimerSeconds = 0;
 
 // DOMContentLoaded
 window.addEventListener('DOMContentLoaded', () => {
-  // Tarih/Saat güncelleme
+  // 1) Tarih/Saat güncelleme
   const dateDiv = document.getElementById('date-div');
   function updateClock() {
     const now = new Date();
@@ -28,25 +28,27 @@ window.addEventListener('DOMContentLoaded', () => {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // Wi-Fi icon kontrolü
+  // 2) Wi-Fi ikon kontrolü
   document.getElementById('saveIPBtn')
-          .addEventListener('click', async () => { await checkConnection(); });
+          .addEventListener('click', checkConnection);
+  document.getElementById('kmresIP')
+          .addEventListener('blur', checkConnection);
 
-  // Main timer start/stop
+  // 3) Main timer start/stop
   document.getElementById('startStopMainTimerWorkFlows')
           .addEventListener('click', toggleMainTimer);
 
-  // Number-of-rows change
+  // 4) Number-of-rows change
   document.getElementById('nWorkFlows')
           .addEventListener('change', renderWorkFlowRows);
 
-  // Start/Stop All
+  // 5) Start/Stop All WorkFlows
   document.getElementById('startStopAllWorkFlows')
           .addEventListener('click', () => {
     for (let i = 1; i <= getRowCount(); i++) toggleWorkFlow(i);
   });
 
-  // Reset All
+  // 6) Reset All
   document.getElementById('resetAllWorkFlows')
           .addEventListener('click', () => {
     for (let i = 1; i <= getRowCount(); i++) {
@@ -59,21 +61,30 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // İlk tablo render
+  // 7) İlk tablo render
   renderWorkFlowRows();
 });
 
-// Bağlantı testi: /nodes endpoint’ine GET
+// Bağlantı testi: önce IP’yi, sonra endpoint’i doğrula
 async function checkConnection() {
   const wifiIcon = document.getElementById('wifiIcon');
+  let base;
   try {
-    await appFetch(getBaseUrl() + 'nodes', null, 'GET');
-    // Bağlı
+    base = getBaseUrl(); // IP geçersizse burası throw eder
+  } catch (e) {
+    wifiIcon.classList.remove('bi-wifi', 'text-success');
+    wifiIcon.classList.add('bi-wifi-off', 'text-danger');
+    wifiIcon.title = 'Geçersiz IP';
+    return;
+  }
+  try {
+    await appFetch(base + 'nodes', null, 'GET');
+    // Başarılı → yeşil
     wifiIcon.classList.remove('bi-wifi-off', 'text-danger');
     wifiIcon.classList.add('bi-wifi', 'text-success');
     wifiIcon.title = 'Bağlı';
   } catch {
-    // Bağlı değil
+    // Başarısız → kırmızı
     wifiIcon.classList.remove('bi-wifi', 'text-success');
     wifiIcon.classList.add('bi-wifi-off', 'text-danger');
     wifiIcon.title = 'Bağlı değil';
@@ -90,8 +101,6 @@ function renderWorkFlowRows() {
   const tbody = document.getElementById('tbodyWorkFlows');
   tbody.innerHTML = '';
   const n = getRowCount();
-        
-  // Disable Kaldırılacak
   for (let i = 1; i <= n; i++) {
     const tr = document.createElement('tr');
     tr.id = `row_${i}`;
@@ -99,11 +108,12 @@ function renderWorkFlowRows() {
       <td>${i}</td>
       <td><input id="robotIdCtrl_${i}" class="form-control" placeholder="RobotID"></td>
       <td>
-        <input id="layoutCtrl_${i}" class="form-control d-inline-block" style="width:4rem" placeholder="Lab"> /
+        <input id="layoutCtrl_${i}"   class="form-control d-inline-block" style="width:4rem" placeholder="Lab"> /
         <input id="districtCtrl_${i}" class="form-control d-inline-block" style="width:4rem" placeholder="D1">
       </td>
-      <td><input id="codeCtrl_${i}" class="form-control" placeholder="W00000001"></td>
-      <td><input id="intervalCtrl_${i}" class="form-control d-inline-block" style="width:4rem" type="number" value="5" min="1"></td>
+      <td><input id="codeCtrl_${i}"  class="form-control" placeholder="W00000001"></td>
+      <td><input id="intervalCtrl_${i}" class="form-control d-inline-block" style="width:4rem"
+                 type="number" value="5" min="1"></td>
       <td id="timerCell_${i}">0:00</td>
       <td>
         <button type="button" id="forceBtn_${i}" class="btn btn-sm btn-warning me-1 disabled">Force</button>
@@ -122,7 +132,6 @@ function renderWorkFlowRows() {
 function toggleMainTimer() {
   const btn  = document.getElementById('startStopMainTimerWorkFlows');
   const disp = document.getElementById('mainFlowTimer');
-
   if (!mainTimerId) {
     mainTimerId = setInterval(() => {
       mainTimerSeconds++;
@@ -139,10 +148,9 @@ function toggleMainTimer() {
   }
 }
 
-// Her satır için Start/Stop
+// Satır bazlı Start/Stop
 function toggleWorkFlow(i) {
   const btn = document.getElementById(`toggleBtn_${i}`);
-
   if (!intervals[i]) {
     runSubMissionRow(i, false);
     const sec = parseInt(document.getElementById(`intervalCtrl_${i}`).value, 10) || 5;
@@ -162,7 +170,7 @@ function toggleWorkFlow(i) {
   }
 }
 
-// Satır timer hücresi güncelle
+// Timer hücresi güncelle
 function updateCell(i, totalSec) {
   const m = Math.floor(totalSec / 60);
   const s = (totalSec % 60).toString().padStart(2, '0');
@@ -176,8 +184,8 @@ async function runSubMissionRow(i, force = false) {
   const district     = document.getElementById(`districtCtrl_${i}`).value.trim();
   const templateCode = document.getElementById(`codeCtrl_${i}`).value.trim();
 
-  const now       = new Date();
-  const stamp     = `${now.getMilliseconds()}-${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+  const now         = new Date();
+  const stamp       = `${now.getMilliseconds()}-${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
   const missionCode = `RW-${i}--${stamp}`;
 
   const url  = getBaseUrl() + 'submitMission';
@@ -204,34 +212,30 @@ async function runSubMissionRow(i, force = false) {
   }
 }
 
-// --- Hazır Butonlar için subMission() Fonksiyonu ---
+// Hazır Butonlar için subMission()
 async function subMission() {
-  // 1) Sabit değerleri al
   const robotId      = PRESET_ROBOT_ID;
   const layout       = PRESET_LAYOUT;
   const district     = PRESET_DISTRICT;
   const templateCode = PRESET_TEMPLATE;
 
-  // 2) Benzersiz missionCode/requestId oluştur
   const now         = new Date();
   const stamp       = `${now.getMilliseconds()}-${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-  const missionCode = `RW-1--${stamp}`;  // "1" tek butonun satır numarası
+  const missionCode = `RW-1--${stamp}`;
 
-  // 3) Payload’u hazırla
   const url  = getBaseUrl() + 'submitMission';
   const body = {
-    orgId:        `${layout}-${district}`, // örn. "4-1"
+    orgId:        `${layout}-${district}`,
     requestId:    missionCode,
     missionCode:  missionCode,
     missionType:  'RACK_MOVE',
-    robotIds:     [robotId],               // örn. ['11']
-    templateCode: templateCode,            // 'W000000033'
+    robotIds:     [robotId],
+    templateCode: templateCode,
     force:        false
   };
 
   console.log('Preset subMission payload:', body);
 
-  // 4) API çağrısı ve sonucu göster
   try {
     const resp = await appFetch(url, body, 'POST');
     renderMissionResponse(resp);
@@ -241,4 +245,3 @@ async function subMission() {
             .textContent = 'Hata: ' + e.message;
   }
 }
-

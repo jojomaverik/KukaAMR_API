@@ -30,11 +30,9 @@ window.addEventListener('DOMContentLoaded', () => {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // 2) Wi-Fi ikon kontrolü: Kaydet’e basınca ve IP alanından çıkınca
-  document.getElementById('saveIPBtn')
-          .addEventListener('click', checkConnection);
+  // 2) Wi-Fi ikon kontrolü
   document.getElementById('kmresIP')
-          .addEventListener('blur', checkConnection);
+          .addEventListener('input', checkConnection);
 
   // 3) Main timer start/stop
   document.getElementById('startStopMainTimerWorkFlows')

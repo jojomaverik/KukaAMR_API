@@ -73,7 +73,7 @@
             </button>
           </div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-success me-2"
+            <button type="button" class="btn btn-success me-2 disabled"
                     onclick="subMission()">
               Onay Gönder
             </button>
@@ -107,7 +107,7 @@
           <button id="startStopAllWorkFlows" class="btn btn-sm btn-primary me-2">
             Start/Stop All WorkFlows
           </button>
-          <button id="resetAllWorkFlows" class="btn btn-sm btn-danger">
+          <button id="resetAllWorkFlows" class="btn btn-sm btn-danger disabled">
             Reset All
           </button>
         </div>
@@ -131,7 +131,7 @@
         </table>
 
         <!-- Response Log -->
-        <pre id="submissionResponse" class="border p-2 bg-light"></pre>
+        <div id="submissionAlert"></div>
       </div>
     </div>
   </div>

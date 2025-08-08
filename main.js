@@ -216,15 +216,14 @@ async function runSubMissionRow(i, force = false) {
 
   console.log('Submitting WorkFlow:', body);
 
-  try {
-    const resp = await appFetch(url, body, 'POST');
-    document.getElementById('submissionResponse')
-            .textContent = JSON.stringify(resp, null, 2);
-  } catch (e) {
-    console.error(e);
-    document.getElementById('submissionResponse')
-            .textContent = 'Hata: ' + e.message;
-  }
+try {
+  const resp = await appFetch(url, body, 'POST');
+  showSubmissionResult(resp);
+} catch (e) {
+  console.error(e);
+  showSubmissionResult({ success: false, message: e.message });
+}
+
 }
 
 // Hazır Butonlar için subMission()
@@ -251,12 +250,27 @@ async function subMission() {
 
   console.log('Preset subMission payload:', body);
 
-  try {
-    const resp = await appFetch(url, body, 'POST');
-    renderMissionResponse(resp);
-  } catch (e) {
-    console.error(e);
-    document.getElementById('submissionResponse')
-            .textContent = 'Hata: ' + e.message;
-  }
+try {
+  const resp = await appFetch(url, body, 'POST');
+  showSubmissionResult(resp);
+} catch (e) {
+  console.error(e);
+  showSubmissionResult({ success: false, message: e.message });
+}
+
+}
+
+function showSubmissionResult(resp) {
+  const alertDiv = document.getElementById('submissionAlert');
+  const type     = resp.success ? 'success' : 'danger';
+  const icon     = resp.success ? 'check-circle-fill' : 'exclamation-triangle-fill';
+  const title    = resp.success ? 'Başarılı!' : `Hata ${resp.code || ''}`;
+  const text     = resp.message || JSON.stringify(resp.data || '');
+  alertDiv.innerHTML = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      <i class="bi bi-${icon} me-2"></i>
+      <strong>${title}</strong> ${text}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    </div>
+  `;
 }

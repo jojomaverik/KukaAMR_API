@@ -1,6 +1,6 @@
 // main.js
 
-// Yardımcı delay
+// Yardımcı delay (isteğe bağlı)
 const delay = s => new Promise(r => setTimeout(r, s * 1000));
 
 // Hazır butonlar sabit değerleri
@@ -8,6 +8,8 @@ const PRESET_ROBOT_ID   = '11';
 const PRESET_LAYOUT     = '4';
 const PRESET_DISTRICT   = '1';
 const PRESET_TEMPLATE   = 'W000000033';
+const PRESET_BASE_URL   = 'http://172.31.0.111:10870/interfaces/api/amr/';
+
 
 // State
 const intervals = {};
@@ -28,7 +30,7 @@ window.addEventListener('DOMContentLoaded', () => {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // 2) Wi-Fi ikon kontrolü
+  // 2) Wi-Fi ikon kontrolü: Kaydet’e basınca ve IP alanından çıkınca
   document.getElementById('saveIPBtn')
           .addEventListener('click', checkConnection);
   document.getElementById('kmresIP')
@@ -65,29 +67,43 @@ window.addEventListener('DOMContentLoaded', () => {
   renderWorkFlowRows();
 });
 
-// Bağlantı testi: önce IP’yi, sonra endpoint’i doğrula
-async function checkConnection() {
+// —————————————————————————————————
+// Wi-Fi ikonunu güncelleyen yardımcı
+function updateIcon(isConnected, title) {
   const wifiIcon = document.getElementById('wifiIcon');
-  let base;
-  try {
-    base = getBaseUrl(); // IP geçersizse burası throw eder
-  } catch (e) {
-    wifiIcon.classList.remove('bi-wifi', 'text-success');
-    wifiIcon.classList.add('bi-wifi-off', 'text-danger');
-    wifiIcon.title = 'Geçersiz IP';
-    return;
-  }
-  try {
-    await appFetch(base + 'nodes', null, 'GET');
-    // Başarılı → yeşil
+  if (isConnected) {
     wifiIcon.classList.remove('bi-wifi-off', 'text-danger');
     wifiIcon.classList.add('bi-wifi', 'text-success');
-    wifiIcon.title = 'Bağlı';
-  } catch {
-    // Başarısız → kırmızı
+  } else {
     wifiIcon.classList.remove('bi-wifi', 'text-success');
     wifiIcon.classList.add('bi-wifi-off', 'text-danger');
-    wifiIcon.title = 'Bağlı değil';
+  }
+  wifiIcon.title = title;
+}
+
+// Bağlantıyı test eden fonksiyon
+async function checkConnection() {
+  let base;
+  try {
+    // IP geçersizse burada hata fırlatır
+    base = getBaseUrl();
+  } catch (e) {
+    updateIcon(false, 'Geçersiz IP');
+    return;
+  }
+
+  try {
+    // Sunucuyla bağlantı: /nodes endpoint’i
+    const resp = await fetch(base + 'nodes', { method: 'GET' });
+    // HTTP 500’den azsa başarılı kabul et
+    if (resp.status < 500) {
+      updateIcon(true, 'Bağlı');
+    } else {
+      updateIcon(false, 'Bağlı değil');
+    }
+  } catch (e) {
+    // Ağ hatası veya timeout
+    updateIcon(false, 'Bağlı değil');
   }
 }
 
@@ -108,10 +124,10 @@ function renderWorkFlowRows() {
       <td>${i}</td>
       <td><input id="robotIdCtrl_${i}" class="form-control" placeholder="RobotID"></td>
       <td>
-        <input id="layoutCtrl_${i}"   class="form-control d-inline-block" style="width:4rem" placeholder="Lab"> /
+        <input id="layoutCtrl_${i}" class="form-control d-inline-block" style="width:4rem" placeholder="Lab"> /
         <input id="districtCtrl_${i}" class="form-control d-inline-block" style="width:4rem" placeholder="D1">
       </td>
-      <td><input id="codeCtrl_${i}"  class="form-control" placeholder="W00000001"></td>
+      <td><input id="codeCtrl_${i}" class="form-control" placeholder="W00000001"></td>
       <td><input id="intervalCtrl_${i}" class="form-control d-inline-block" style="width:4rem"
                  type="number" value="5" min="1"></td>
       <td id="timerCell_${i}">0:00</td>
@@ -128,10 +144,11 @@ function renderWorkFlowRows() {
   }
 }
 
-// Main timer
+// Main timer start/stop
 function toggleMainTimer() {
   const btn  = document.getElementById('startStopMainTimerWorkFlows');
   const disp = document.getElementById('mainFlowTimer');
+
   if (!mainTimerId) {
     mainTimerId = setInterval(() => {
       mainTimerSeconds++;
@@ -223,7 +240,7 @@ async function subMission() {
   const stamp       = `${now.getMilliseconds()}-${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
   const missionCode = `RW-1--${stamp}`;
 
-  const url  = getBaseUrl() + 'submitMission';
+  const url  = PRESET_BASE_URL + 'submitMission';
   const body = {
     orgId:        `${layout}-${district}`,
     requestId:    missionCode,

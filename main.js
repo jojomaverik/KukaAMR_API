@@ -2,6 +2,12 @@
 
 // Yardımcı delay (isteğe bağlı)
 const delay = s => new Promise(r => setTimeout(r, s * 1000));
+// Hazır butonlar sabit değer değişimi ---
+const PRESET_ROBOT_ID   = '11';      
+const PRESET_LAYOUT     = '4';           
+const PRESET_DISTRICT   = '1';            
+const PRESET_TEMPLATE   = 'W000000033';   
+
 
 // State
 const intervals = {};
@@ -84,7 +90,8 @@ function renderWorkFlowRows() {
   const tbody = document.getElementById('tbodyWorkFlows');
   tbody.innerHTML = '';
   const n = getRowCount();
-
+        
+  // Disable Kaldırılacak
   for (let i = 1; i <= n; i++) {
     const tr = document.createElement('tr');
     tr.id = `row_${i}`;
@@ -99,7 +106,7 @@ function renderWorkFlowRows() {
       <td><input id="intervalCtrl_${i}" class="form-control d-inline-block" style="width:4rem" type="number" value="5" min="1"></td>
       <td id="timerCell_${i}">0:00</td>
       <td>
-        <button type="button" id="forceBtn_${i}" class="btn btn-sm btn-warning me-1">Force</button>
+        <button type="button" id="forceBtn_${i}" class="btn btn-sm btn-warning me-1 disabled">Force</button>
         <button type="button" id="toggleBtn_${i}" class="btn btn-sm btn-info">Start</button>
       </td>`;
     tbody.appendChild(tr);
@@ -196,3 +203,42 @@ async function runSubMissionRow(i, force = false) {
             .textContent = 'Hata: ' + e.message;
   }
 }
+
+// --- Hazır Butonlar için subMission() Fonksiyonu ---
+async function subMission() {
+  // 1) Sabit değerleri al
+  const robotId      = PRESET_ROBOT_ID;
+  const layout       = PRESET_LAYOUT;
+  const district     = PRESET_DISTRICT;
+  const templateCode = PRESET_TEMPLATE;
+
+  // 2) Benzersiz missionCode/requestId oluştur
+  const now         = new Date();
+  const stamp       = `${now.getMilliseconds()}-${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+  const missionCode = `RW-1--${stamp}`;  // "1" tek butonun satır numarası
+
+  // 3) Payload’u hazırla
+  const url  = getBaseUrl() + 'submitMission';
+  const body = {
+    orgId:        `${layout}-${district}`, // örn. "4-1"
+    requestId:    missionCode,
+    missionCode:  missionCode,
+    missionType:  'RACK_MOVE',
+    robotIds:     [robotId],               // örn. ['11']
+    templateCode: templateCode,            // 'W000000033'
+    force:        false
+  };
+
+  console.log('Preset subMission payload:', body);
+
+  // 4) API çağrısı ve sonucu göster
+  try {
+    const resp = await appFetch(url, body, 'POST');
+    renderMissionResponse(resp);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('submissionResponse')
+            .textContent = 'Hata: ' + e.message;
+  }
+}
+
